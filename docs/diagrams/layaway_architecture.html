@@ -1,0 +1,77 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; background: #fbfcfd; color: #1a202c; width: 1740px; padding: 28px 34px; }
+  h1 { font-size: 27px; letter-spacing: -.3px; }
+  .sub { color: #d95d1a; font-size: 15px; margin: 5px 0 16px; font-weight: 600; }
+  .tier { border: 2px dashed #b9c2cc; border-radius: 14px; background: #fff; padding: 14px 18px; margin-bottom: 14px; }
+  .tier-label { color:#8a94a1; font-weight:700; font-size:13.5px; margin-bottom: 10px; text-transform: uppercase; letter-spacing:.4px;}
+  .cards { display: flex; gap: 12px; }
+  .card { flex: 1; border: 1.8px solid #2d3748; border-radius: 10px; padding: 11px 13px; font-size: 12.5px; background:#fff; }
+  .card b { display:block; font-size: 13.5px; margin-bottom: 4px; }
+  .card ul { padding-left: 15px; line-height: 1.5; color:#445; }
+  .blue { border-color:#4a7fd4; background:#eef4fd; }
+  .green { border-color:#2f9e57; background:#e9f7ee; }
+  .orange { border-color:#d98f00; background:#fff8e6; }
+  .purple { border-color:#7b5cd6; background:#f1edfc; }
+  .flow-legend { display:flex; gap: 10px; flex-wrap: wrap; margin: 12px 0 2px; }
+  .leg { font-size: 12px; padding: 5px 12px; border-radius: 18px; color:#fff; font-weight:600; }
+  .l1{background:#2b8a3e;} .l2{background:#1c6fd4;} .l3{background:#c05e0a;} .l4{background:#8b45c9;} .l5{background:#b53030;}
+  .conn { text-align:center; color:#556; font-size: 12px; padding: 7px 0; }
+  .pill { display:inline-block; border-radius: 14px; padding: 3px 11px; font-size: 11.5px; color:#fff; font-weight: 700; margin: 0 4px; }
+  .flownotes { display:flex; gap:12px; margin-top: 8px;}
+  .fn-card { flex:1; border:1.6px solid; border-radius:10px; padding:10px 13px; font-size:12px; line-height:1.5;}
+  .f1{border-color:#2b8a3e; background:#e9f7ee;} .f2{border-color:#1c6fd4; background:#eef4fd;} .f3{border-color:#c05e0a; background:#fdf1e4;} .f4{border-color:#8b45c9; background:#f1edfc;} .f5{border-color:#b53030; background:#fdeeee;}
+  .fn-card b { font-size: 12.5px; }
+</style></head><body>
+  <h1>LAYAWAY — Component Architecture <span style="font-size:14px; background:#2d3748; color:#fff; border-radius:20px; padding:3px 12px; vertical-align:4px; margin-left:8px;">ONE APP · 6 SURFACES · 1 LEDGER</span></h1>
+  <div class="sub">How online + POS share one order, one ledger, one installment engine</div>
+
+  <div class="tier">
+    <div class="tier-label">Surfaces — app “layaway-pos” (client d396f1…)</div>
+    <div class="cards">
+      <div class="card blue"><b>Online Store<br>· theme app embed</b><ul><li>“Pay With Reserve” cart link</li><li>Down-payment modal (10% min)</li><li>writes cart attrs + line props</li></ul></div>
+      <div class="card blue"><b>Checkout<br>· function + UI ext</b><ul><li>Cart Transform: reprice web cart to deposit</li><li>UI block: total / due today / remaining</li></ul></div>
+      <div class="card blue"><b>Customer Accounts<br>· order status ext</b><ul><li>Installment plan card + history</li><li>“Make a payment” → backend</li><li>native Pay now completes it</li></ul></div>
+      <div class="card blue"><b>POS<br>· tile + modal ext</b><ul><li>New layaway: attrs + discount(=balance)</li><li>Pay existing: amount → Order Edit (Direct API, backend fallback) → Collect payment</li><li>cancel pending payment</li></ul></div>
+      <div class="card blue"><b>Admin<br>· app home</b><ul><li>Layaway dashboard: active / outstanding / collected</li><li>ledger table, links to orders</li></ul></div>
+      <div class="card blue"><b>Email<br>· native invoices</b><ul><li>Order Edit commit emails the customer the amount owing + pay link</li></ul></div>
+    </div>
+  </div>
+
+  <div class="conn">▲▼ &nbsp; Admin GraphQL API (Direct API from extensions · offline token from backend) &nbsp;·&nbsp; AJAX Cart API (storefront) &nbsp;·&nbsp; webhooks ▼</div>
+
+  <div class="tier">
+    <div class="tier-label">Shopify platform — the order is the product; the ledger is the truth</div>
+    <div class="cards">
+      <div class="card green"><b>Cart</b><ul><li>attributes: layaway_total / deposit / balance / channel…</li><li>line item properties (per item)</li><li>fixed discount (POS) · repriced lines (web)</li></ul></div>
+      <div class="card green" style="flex:1.3"><b>ONE Order (deposit-shaped)</b><ul><li>total = charged so far · grows per payment</li><li>tag <b>layaway</b> · note attributes</li><li>metafield <b>$app:layaway.ledger</b> (real total, paid, balance, payments, status)</li><li>fulfillment HOLD until balance = 0</li></ul></div>
+      <div class="card orange"><b>Order Edit API</b><ul><li>the installment vehicle</li><li>orderEditBegin → AddCustomItem(“Layaway payment #n”, $X, presentment currency) → Commit</li><li>setQuantity 0 = cancel pending</li></ul></div>
+      <div class="card green"><b>Payments</b><ul><li>Pay now / email link = exact outstanding</li><li>POS Collect payment = tap-to-pay, cash, card</li><li>transaction posted ×N</li></ul></div>
+      <div class="card green"><b>Webhooks</b><ul><li>orders/create · orders/edited</li><li>orders/paid · order_transactions/create</li></ul></div>
+    </div>
+  </div>
+
+  <div class="conn">▼ HTTPS (cloudflared tunnel in demo · real hosting in prod) ▼</div>
+
+  <div class="tier">
+    <div class="tier-label">Layaway backend — Express, the only writer of layaway state</div>
+    <div class="cards">
+      <div class="card purple"><b>OAuth + sessions</b><ul><li>offline admin token (SQLite)</li><li>scopes: read_all_orders · write_orders · write_order_edits · fulfillment holds · cart transforms</li></ul></div>
+      <div class="card purple" style="flex:1.25"><b>Ledger engine (syncLayawayOrder)</b><ul><li>idempotent: recomputes on every webhook — never increments</li><li>paid = order total − outstanding · balance = real − paid</li><li>tags order · writes metafield · applies/releases holds at $0</li></ul></div>
+      <div class="card purple"><b>Installment API</b><ul><li>POST /api/layaway/:id/payment (amount, channel) → Order Edit + poll</li><li>POST …/payment/cancel (safe: only uncollected lines)</li><li>GET /api/layaway/:id → ledger (CORS for extensions)</li></ul></div>
+      <div class="card purple"><b>Guards</b><ul><li>amount ≤ balance · reject stacking on pending due</li><li>presentment currency</li><li>poll after orderEditCommit</li></ul></div>
+    </div>
+  </div>
+
+  <div class="flow-legend">
+    <span class="leg l1">① WEB DEPOSIT</span><span class="leg l2">② POS DEPOSIT</span><span class="leg l3">③ ONLINE INSTALLMENT</span><span class="leg l4">④ IN-STORE INSTALLMENT</span><span class="leg l5">⑤ RECONCILIATION LOOP</span>
+  </div>
+  <div class="flownotes">
+    <div class="fn-card f1"><b>① Web deposit</b><br>modal → cart attrs → Cart Transform reprices → checkout charges deposit → order created → ⑤</div>
+    <div class="fn-card f2"><b>② POS deposit</b><br>tile modal → attrs + discount(=balance) → normal POS sale charges deposit → same order shape → ⑤</div>
+    <div class="fn-card f3"><b>③ Online installment</b><br>My Account card → backend /payment → Order Edit adds $X line → Pay now / email link charges $X → ⑤</div>
+    <div class="fn-card f4"><b>④ In-store installment</b><br>POS “Pay existing” → amount → Order Edit (Direct API ▸ backend fallback) → Collect payment $X tap-to-pay → ⑤</div>
+    <div class="fn-card f5"><b>⑤ Reconciliation</b><br>every webhook → recompute ledger from the order → update metafield → balance 0? release hold → “ships at full payoff”</div>
+  </div>
+</body></html>

@@ -1,0 +1,22 @@
+query CartTransformRunInput {
+  cart {
+    layaway: attribute(key: "layaway") {
+      value
+    }
+    channel: attribute(key: "layaway_channel") {
+      value
+    }
+    deposit: attribute(key: "layaway_deposit") {
+      value
+    }
+    lines {
+      id
+      quantity
+      cost {
+        totalAmount {
+          amount
+        }
+      }
+    }
+  }
+}

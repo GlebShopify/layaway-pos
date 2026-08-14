@@ -1,0 +1,32 @@
+{% comment %}
+  Layaway "Pay With Reserve" — app embed.
+  Injects a reserve link into the cart page / cart drawer and opens the
+  Enter Down Payment modal. On confirm it writes the layaway_* cart
+  attributes + line item properties (same schema as the POS extension)
+  and sends the customer to checkout.
+{% endcomment %}
+
+<script>
+  window.LAYAWAY_CONFIG = {
+    minPct: {{ block.settings.min_pct | default: 10 }},
+    defaultPct: {{ block.settings.default_pct | default: 10 }},
+    termsUrl: {{ block.settings.terms_url | json }},
+    balanceDueDays: {{ block.settings.balance_due_days | default: 60 }},
+    restockPct: {{ block.settings.min_pct | default: 10 }}
+  };
+</script>
+<script src="{{ 'layaway-reserve.js' | asset_url }}" defer></script>
+<link rel="stylesheet" href="{{ 'layaway-reserve.css' | asset_url }}">
+
+{% schema %}
+{
+  "name": "Layaway Reserve",
+  "target": "body",
+  "settings": [
+    { "type": "range", "id": "min_pct", "label": "Minimum down payment (%)", "min": 5, "max": 50, "step": 5, "default": 10 },
+    { "type": "range", "id": "default_pct", "label": "Default down payment (%)", "min": 5, "max": 50, "step": 5, "default": 10 },
+    { "type": "range", "id": "balance_due_days", "label": "Balance due (days)", "min": 30, "max": 180, "step": 30, "default": 60 },
+    { "type": "url", "id": "terms_url", "label": "Reserve terms page" }
+  ]
+}
+{% endschema %}

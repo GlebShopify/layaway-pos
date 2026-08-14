@@ -1,0 +1,7 @@
+packages:
+  - 'extensions/*'
+  - 'web'
+allowBuilds:
+  esbuild: true
+  sqlite3: true
+  core-js: true

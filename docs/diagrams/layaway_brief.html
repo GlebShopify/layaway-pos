@@ -1,0 +1,74 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  @page { size: letter; margin: 0.75in 0.85in; }
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1a202c; font-size: 10.5pt; line-height: 1.5; }
+  h1 { font-size: 19pt; letter-spacing: -.3px; margin-bottom: 2pt; }
+  .meta { color: #556; font-size: 9pt; margin-bottom: 4pt; }
+  .meta b { color: #1a202c; }
+  .rule { border: none; border-top: 2px solid #1a202c; margin: 10pt 0 12pt; }
+  h2 { font-size: 12.5pt; margin: 13pt 0 5pt; color: #0f2740; }
+  h2 .n { color: #d95d1a; }
+  p { margin-bottom: 7pt; }
+  ol, ul { margin: 0 0 8pt 18pt; }
+  li { margin-bottom: 4pt; }
+  b.k { color: #0f2740; }
+  .callout { border-left: 3.5px solid #d95d1a; background: #fdf4ec; padding: 8pt 11pt; margin: 8pt 0; font-size: 10pt; }
+  .callout.blue { border-color: #2b5cad; background: #eef4fd; }
+  table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 9.5pt; }
+  th { text-align: left; background: #0f2740; color: #fff; padding: 5pt 8pt; font-size: 9pt; }
+  td { border: 1px solid #cbd5e0; padding: 4.5pt 8pt; vertical-align: top; }
+  tr:nth-child(even) td { background: #f6f8fa; }
+  code { background: #eef1f4; border-radius: 3px; padding: 0 3px; font-size: 9pt; font-family: "SF Mono", Menlo, monospace; }
+  .footer-note { color: #667; font-size: 8.5pt; margin-top: 10pt; border-top: 1px solid #cbd5e0; padding-top: 6pt; }
+  .badge { display: inline-block; background: #2f9e57; color: #fff; border-radius: 12px; padding: 1px 9px; font-size: 8.5pt; font-weight: 700; vertical-align: 2pt; margin-left: 6pt;}
+</style></head><body>
+
+<h1>Layaway on Shopify — Solution Brief <span class="badge">WORKING PROTOTYPE</span></h1>
+<div class="meta"><b>Status:</b> live on <code>se-shopvip-en-cten</code> — POS · online store · customer accounts · admin &nbsp;·&nbsp; <b>Architecture:</b> "Option C — Order Edit as the Installment Engine" · native · single store · no new platform primitives</div>
+<hr class="rule">
+
+<h2><span class="n">01</span> &nbsp;What it is</h2>
+<p>A layaway (reserve) program that works across every Shopify surface with <b class="k">one order per layaway</b>: a customer puts down a deposit (minimum 10%) on a full-price cart — online or at the register — then pays the balance in any number of installments, of <b class="k">any amount, through any channel</b>: their account page, an emailed pay link, or in store at POS. The item ships only when the balance reaches zero.</p>
+
+<h2><span class="n">02</span> &nbsp;How it works — the 60-second version</h2>
+<ol>
+<li><b class="k">Deposit.</b> The customer commits to a layaway in a "down payment" flow (a storefront modal online; a smart-grid tile modal on POS). Both enforce the 10% minimum, show the math (due today vs. remaining), and stamp the cart with identical <code>layaway_*</code> attributes. Checkout then charges <b>only the deposit</b> — online via a Cart Transform function that reprices the lines; on POS via a fixed discount equal to the balance, so the cashier simply rings a normal sale whose total <i>is</i> the deposit.</li>
+<li><b class="k">One order, one ledger.</b> The resulting order is "deposit-shaped": its total reflects money actually charged so far. A backend app tags it <code>layaway</code>, records the <b>real total, amount paid, and balance in a ledger metafield</b>, and places a fulfillment hold — <i>ships at full payoff</i>.</li>
+<li><b class="k">Installments.</b> Each payment starts with the customer (or cashier) choosing an amount. The app's installment engine uses the <b>Order Edit API</b> to add a custom line item for exactly that amount — which becomes the order's outstanding balance. Shopify's native payment surfaces then do what they always do: <b>Pay now</b> online charges exactly that amount; <b>Collect payment</b> on POS takes it by tap-to-pay, card, or cash. Repeat until the ledger hits zero; the hold releases automatically.</li>
+<li><b class="k">Visibility.</b> A customer sees their installment plan (balance, history, "Make a payment") on their account's order page. Staff see every layaway — channel, status, paid vs. balance — in a dashboard inside the app in admin, and can look up any layaway on POS by customer email or order number.</li>
+</ol>
+
+<h2><span class="n">03</span> &nbsp;Why this design</h2>
+<div class="callout blue">Shopify has <b>no native partial-payment option for online customers</b>: the only thing a customer can ever pay against an order is its <i>entire</i> outstanding amount. That single constraint drives the whole architecture.</div>
+<p>Orders therefore start small (the deposit) and <b class="k">grow with each payment</b> — every installment creates a bite-sized outstanding that native checkout can charge exactly. The order total becomes a record of payments; the <b class="k">ledger metafield is the source of truth</b> for the real total and remaining balance.</p>
+
+<h2><span class="n">04</span> &nbsp;Caveat: where we started on POS, and where we landed</h2>
+<p><b class="k">The original POS approach was more native — and incompatible.</b> Our first build used POS's built-in partial payment: ring the full $1,000 cart, capture $250 at the register, and the order lands as genuinely "partially paid" with $750 outstanding. It was the cleanest possible in-store experience with perfect order data.</p>
+<p>It failed the moment the customer went home. That order's $750 outstanding is indivisible online — Pay now demands all of it. In-store-started layaways couldn't be paid down in installments from the customer's account, which broke the core promise of the program.</p>
+<p><b class="k">The fix was unifying the order shape.</b> POS layaways are now created exactly like web ones: the extension applies a fixed discount equal to the balance, the deposit is charged as a normal full payment, and the order is indistinguishable from a web reserve. A bonus we didn't expect: the cashier experience got <i>simpler</i> — no partial-tender steps, no amounts to remember; the total on the screen is the deposit.</p>
+<p><b class="k">Trade-offs we accepted</b> (flagged in the design from day one):</p>
+<ul>
+<li>Order totals no longer equal merchandise value mid-layaway → <b>reporting must read the ledger</b>, not order totals.</li>
+<li>A "Layaway — balance due later" discount line is visible on POS-created orders and every subsequent pay screen (it is the one-time deposit discount — never a per-installment one).</li>
+<li>Tax is recalculated per payment rather than charged once up front.</li>
+<li>The native "Partially paid" badge is no longer the status source; the ledger and the admin dashboard are.</li>
+</ul>
+<div class="callout"><b>The long-term ask:</b> a platform primitive to <i>add a transaction of $X to an existing order</i>. With it, POS keeps fully native flows, orders keep true totals, and most of this app's workaround code (cart transform, deposit discount, ledger gymnastics) disappears. This prototype is both the interim solution and the evidence for that ask.</div>
+
+<h2><span class="n">05</span> &nbsp;What was built — one app, six surfaces</h2>
+<table>
+<tr><th style="width:26%">Surface</th><th>Component</th></tr>
+<tr><td>Online store</td><td>Theme app embed: "Pay With Reserve" + down-payment modal</td></tr>
+<tr><td>Checkout</td><td>Cart Transform function (deposit repricing) + breakdown UI block</td></tr>
+<tr><td>Customer accounts</td><td>Installment plan card + "Make a payment" modal</td></tr>
+<tr><td>POS</td><td>Tile + modal: new layaway, pay/cancel installments, ledger lookup</td></tr>
+<tr><td>Admin</td><td>Layaway dashboard (active, outstanding, collected, per-order ledger)</td></tr>
+<tr><td>Backend</td><td>Ledger engine (webhook-driven, idempotent), installment API, fulfillment holds</td></tr>
+</table>
+
+<p><b class="k">Key gotchas encountered:</b> <code>write_order_edits</code> is a distinct scope from <code>write_orders</code>; order edits must use the presentment currency (CAD ≠ shop USD on our demo store); poll after <code>orderEditCommit</code> (no read-after-write guarantee); guard against stacking a second pending installment on an uncollected one.</p>
+
+<div class="footer-note">Layaway prototype · Shopify VIP demo environment · companion diagrams: <i>layaway_flows.png</i> (deposit + installment flows, POS explainer) and <i>layaway_architecture.png</i> (component architecture) · full design docs in the app repo under /docs</div>
+
+</body></html>

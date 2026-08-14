@@ -1,0 +1,131 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+  * { box-sizing: border-box; margin: 0; }
+  body { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; background: #fbfcfd; color: #1a202c; width: 1740px; padding: 28px 34px; }
+  h1 { font-size: 27px; letter-spacing: -.3px; }
+  .sub { color: #d95d1a; font-size: 15px; margin: 5px 0 18px; font-weight: 600; }
+  .layout { display: flex; gap: 22px; }
+  .flows { flex: 1 1 auto; border: 2px dashed #b9c2cc; border-radius: 14px; padding: 20px 22px 16px; background: #fff; }
+  .zone-title { color: #8a94a1; font-weight: 700; font-size: 15px; margin-bottom: 14px; }
+  .flow { margin-bottom: 26px; }
+  .flow h3 { font-size: 14.5px; color: #4a5568; margin-bottom: 12px; }
+  .row { display: flex; align-items: center; gap: 0; }
+  .node { border: 1.8px solid #2d3748; border-radius: 10px; background: #fff; padding: 12px 14px; font-size: 13px; text-align: center; min-width: 128px; max-width: 205px; }
+  .node b { display:block; font-size: 13.5px; margin-bottom: 2px; }
+  .node small { color:#556; font-size: 11.5px; line-height: 1.35; display: block;}
+  .fn { border: 1.8px solid #4a7fd4; background: #eef4fd; border-radius: 14px; transform: skewX(-8deg); }
+  .fn > div { transform: skewX(8deg); }
+  .accent { border-color: #d98f00; background:#fff8e6; }
+  .green { border-color: #2f9e57; background: #e9f7ee; }
+  .arrow { flex: 0 0 auto; width: 34px; height: 2px; background: #2d3748; position: relative; margin: 0 2px; }
+  .arrow:after { content:""; position: absolute; right: -1px; top: -4px; border-left: 9px solid #2d3748; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+  .note { font-size: 11.5px; color: #667; margin-top: 8px; font-style: italic; }
+  .order-strip { display:flex; align-items:center; gap:14px; margin: 4px 0 26px; }
+  .order-card { border: 2px solid #2f9e57; background: #e9f7ee; border-radius: 12px; padding: 14px 18px; font-size: 13px; min-width: 320px;}
+  .order-card b{ font-size: 15px; }
+  .ledger { border: 1.6px solid #d98f00; background: #fff8e6; border-radius: 10px; padding: 10px 14px; font-size: 12.5px; }
+  .ship { border: 2px solid #2f9e57; background:#e9f7ee; border-radius: 10px; padding: 12px 16px; font-size: 13px; font-weight: 600; }
+  .panel { border: 2px dashed; border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; background: #fff; }
+  .panel h2 { font-size: 15.5px; margin-bottom: 10px; }
+  .panel .chip { border: 1.6px solid; border-radius: 10px; padding: 9px 12px; font-size: 12.5px; margin-bottom: 8px; }
+  .panel .chip b { display: block; font-size: 13px; }
+  .p-blue { border-color:#4a7fd4; } .p-blue h2{color:#2b5cad;} .p-blue .chip{border-color:#4a7fd4; background:#eef4fd;}
+  .p-orange { border-color:#e0771f; } .p-orange h2{color:#c05e0a;} .p-orange .chip{border-color:#e0771f; background:#fdf1e4;}
+  .p-red { border-color:#d24545; } .p-red h2{color:#b53030;} .p-red ul{ padding-left:16px; font-size:12.5px; color:#7c2d2d; line-height:1.55;}
+  .side { flex: 0 0 470px; }
+  .footer { border: 2px solid #d24545; background:#fdeeee; border-radius: 12px; padding: 12px 18px; margin-top: 14px; font-size: 12.5px; color:#7c2d2d; }
+  .footer b { color:#b53030; }
+  .tag { display:inline-block; background:#2d3748; color:#fff; border-radius: 20px; font-size: 10.5px; padding: 2px 9px; margin-left: 8px; vertical-align: 2px;}
+  .loop { font-size: 12px; color:#2f9e57; font-weight:600; margin-left: 10px; }
+</style></head><body>
+  <h1>LAYAWAY — Order Edit as the Installment Engine <span class="tag">SHIPPED · WEB + POS</span></h1>
+  <div class="sub">Native · Single Store · ONE order per layaway, every channel · ledger tracks the real total</div>
+  <div class="layout">
+    <div class="flows">
+      <div class="zone-title">se-shopvip demo store · one deposit-shaped order · N transactions across channels</div>
+
+      <div class="flow">
+        <h3>① DEPOSIT — ONLINE (theme extension + function)</h3>
+        <div class="row">
+          <div class="node"><b>Shopping Bag</b><small>“Pay With Reserve” link</small></div>
+          <div class="arrow"></div>
+          <div class="node"><b>Down Payment modal</b><small>amount ≥ 10% · due today vs remaining · terms</small></div>
+          <div class="arrow"></div>
+          <div class="node fn"><div><b>Cart Transform Fn</b><small>reprice lines to deposit ($2k of $10k) · web only</small></div></div>
+          <div class="arrow"></div>
+          <div class="node"><b>Checkout (deposit)</b><small>+ breakdown banner (checkout UI ext)</small></div>
+        </div>
+        <div class="note">Repricing, not a discount. Cart attributes + line properties carry layaway_total / deposit / balance.</div>
+      </div>
+
+      <div class="flow">
+        <h3>② DEPOSIT — POS (NEW · what we built)</h3>
+        <div class="row">
+          <div class="node"><b>POS cart + customer</b><small>full-price items</small></div>
+          <div class="arrow"></div>
+          <div class="node"><b>Layaway tile → modal</b><small>deposit ≥ 10% incl. tax · writes same layaway_* attributes</small></div>
+          <div class="arrow"></div>
+          <div class="node fn"><div><b>Cart discount = balance</b><small>“Layaway — balance due later” · POS’s only price lever</small></div></div>
+          <div class="arrow"></div>
+          <div class="node"><b>POS checkout</b><small>normal FULL payment — the total IS the deposit</small></div>
+        </div>
+        <div class="note">No split tender, no amounts to remember — cashier just rings a normal sale. Lands the identical order shape as web.</div>
+      </div>
+
+      <div class="order-strip">
+        <div class="order-card"><b>ONE Order (deposit-shaped)</b><br>total = amount charged so far · grows per payment<br>tag <b>layaway</b> · fulfillment <b>HOLD</b> until payoff</div>
+        <div class="ledger"><b>Ledger (metafield $app:layaway)</b><br>real total $10,000 · paid · balance · payment history<br><i>reporting reads THIS, not the order total</i></div>
+        <div class="arrow"></div>
+        <div class="ship">Ships at full payoff<br><small style="font-weight:400">balance = 0 → hold released</small></div>
+      </div>
+
+      <div class="flow">
+        <h3>③ INSTALLMENTS — any amount, any channel (repeat until balance = 0)</h3>
+        <div class="row">
+          <div class="node"><b>My Account</b><small>Installment card → “Make a payment” (customer sets amount)</small></div>
+          <div class="arrow"></div>
+          <div class="node accent"><b>Order Edit API</b><small>adds custom line = payment amount → becomes the outstanding</small></div>
+          <div class="arrow"></div>
+          <div class="node"><b>Pay now / email link</b><small>charges exactly the amount · tax per payment</small></div>
+          <span class="loop">→ posts transaction ×N → ledger updates</span>
+        </div>
+        <div style="height:10px"></div>
+        <div class="row">
+          <div class="node"><b>POS “Pay existing layaway”</b><small>search by email / order # · staff sets amount (25 / 50 / full / custom) · can cancel pending</small></div>
+          <div class="arrow"></div>
+          <div class="node accent"><b>Same Order Edit engine</b><small>Direct API, backend fallback</small></div>
+          <div class="arrow"></div>
+          <div class="node"><b>Collect payment</b><small>tap-to-pay / cash / card — exact amount</small></div>
+        </div>
+        <div class="note">Same order is visible in My Account and POS — deposit in store, pay online from the couch, finish in store. One engine.</div>
+      </div>
+    </div>
+
+    <div class="side">
+      <div class="panel p-blue">
+        <h2>▶ How POS works (shipped)</h2>
+        <div class="chip"><b>Smart-grid tile + modal (POS UI extension)</b>New layaway: validates deposit ≥ 10% of total incl. tax, shows the math, writes the same layaway_* attributes as web.</div>
+        <div class="chip"><b>Discount = the register’s repricing lever</b>Extensions can’t run cart transforms at POS; a fixed discount (= balance) makes checkout charge exactly the deposit as a normal sale.</div>
+        <div class="chip"><b>Backend webhook finishes the job</b>Tags order “layaway”, writes the ledger metafield, applies the fulfillment hold.</div>
+        <div class="chip"><b>Collecting later</b>“Pay existing layaway” → choose amount → Order Edit creates that exact outstanding → native Collect payment (tap-to-pay). Same order shows in My Account for at-home payments.</div>
+      </div>
+      <div class="panel p-orange">
+        <h2>◆ Why one shape (the key constraint)</h2>
+        <div class="chip"><b>Pay now = full outstanding, always</b>Online customers can’t pay partial amounts against an order — so orders must start small and grow.</div>
+        <div class="chip"><b>Custom line item = customer-set amount</b>→ instantly generates a real checkout for exactly that much.</div>
+        <div class="chip"><b>Ledger = source of truth</b>Real total vs paid lives in the metafield; order total is a payment record.</div>
+      </div>
+      <div class="panel p-red">
+        <h2>⚠ Landmines</h2>
+        <ul>
+          <li>Reporting / exports must read the ledger, not order totals</li>
+          <li>Scopes: read_all_orders · write_order_edits · write_cart_transforms</li>
+          <li>Poll after orderEditCommit (no read-after-write guarantee)</li>
+          <li>Order edits must use the presentment currency (CAD ≠ shop USD)</li>
+          <li>Deposit discount stays visible on every POS-order pay screen</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footer"><b>✖ Retired vs. first prototype:</b>&nbsp; native POS split-tender partial payment (created a full-outstanding order online customers could only pay in full) · two order shapes · “partially paid” badge as the status source — replaced by the ledger + unified deposit shape.</div>
+</body></html>

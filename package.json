@@ -1,0 +1,28 @@
+{
+  "name": "layaway-pos",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "workspaces": [
+    "extensions/*",
+    "web"
+  ],
+  "scripts": {
+    "shopify": "shopify",
+    "build": "shopify app build",
+    "dev": "shopify app dev",
+    "info": "shopify app info",
+    "generate": "shopify app generate",
+    "deploy": "shopify app deploy"
+  },
+  "dependencies": {
+    "@shopify/cli": "4.5.1"
+  },
+  "trustedDependencies": [
+    "@shopify/plugin-cloudflare"
+  ],
+  "author": "gleb",
+  "private": true,
+  "devDependencies": {
+    "@graphql-codegen/cli": "^7.2.0"
+  }
+}
